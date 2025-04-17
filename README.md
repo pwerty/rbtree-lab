@@ -4,7 +4,7 @@ Balanced search tree로 많이 쓰이는 Red-black tree (이하 RB tree)를 C �
 구현하는 추상 자료형 (ADT: abstract data type)은 ordered set, multiset 입니다.
 
 ## 구현 범위
-다음 기능들을 수행할 수 있도록 RB tree를 구현합니다.
+다음 기능들을 수행할 수 있도록 RB tree를 구현합니다.!!
 
 - tree = `new_tree()`: RB tree 구조체 생성
   - 여러 개의 tree를 생성할 수 있어야 하며 각각 다른 내용들을 저장할 수 있어야 합니다.
