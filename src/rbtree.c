@@ -43,24 +43,52 @@ void delete_rbtree(rbtree *t) {
 
 node_t *rbtree_insert(rbtree *t, const key_t key) {
   // TODO: implement insert
+  
   return t->root;
 }
 
 node_t *rbtree_find(const rbtree *t, const key_t key) {
-  // TODO: implement find
-  return t->root;
+
+  // This RBTree can apply multiply nodes even same key value.
+  node_t *cur = t->root;
+
+  while(cur != t->nil)
+  {
+    if(cur->key == key)
+      return cur;
+    else if(cur->key > key)
+      cur = cur->left;
+    else
+      cur = cur->right;
+  }
+  
+  return t->nil;
 }
 
 node_t *rbtree_min(const rbtree *t) {
-  // TODO: implement find
-  // find 계열 함수, 맨 좌측 하단을 계속 타고 내려간 다음, nil 만나면 직전을 리턴한다.
-  return t->root;
+  node_t *prev = NULL;
+  node_t *cur = t->root;
+
+  while(cur != t->nil)
+  {
+    prev = cur;
+    cur = cur->left;
+  }
+  
+  return prev;
 }
 
 node_t *rbtree_max(const rbtree *t) {
-  // TODO: implement find
-  // find 계열 함수, 맨 우측 하단을 계속 타고 내려간 다음, nil 만나면 직전을 리턴한다.
-  return t->root;
+  node_t *prev = NULL;
+  node_t *cur = t->root;
+
+  while(cur != t->nil)
+  {
+    prev = cur;
+    cur = cur->right;
+  }
+  
+  return prev;
 }
 
 int rbtree_erase(rbtree *t, node_t *p) {
