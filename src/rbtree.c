@@ -28,8 +28,98 @@ tree_to_array(tree, array, n)
 RB tree의 내용을 key 순서대로 주어진 array로 변환
 array의 크기는 n으로 주어지며 tree의 크기가 n 보다 큰 경우에는 순서대로 n개 까지만 변환
 array의 메모리 공간은 이 함수를 부르는 쪽에서 준비하고 그 크기를 n으로 알려줍니다.
-
 */
+void rotateLeft(rbtree *t, node_t *node)
+{
+  node_t *otherNode = node->right;
+  node->right = otherNode->left;
+
+  if(otherNode->left != t->nil)
+    otherNode->left->parent = node;
+
+  otherNode->parent = node->parent;
+  if(node->parent == t->nil)
+    t->root = otherNode;
+  else if(node == node->parent->left)
+    node->parent->left = otherNode;
+  else
+    node->parent->right = otherNode;
+
+  otherNode->left = node;
+  node->parent = otherNode;
+}
+
+void rotateRight(rbtree *t, node_t *node)
+{
+  node_t *otherNode = node->left;
+  node->left = otherNode->right;
+  if(otherNode->right != t->nil)
+    otherNode->right->parent = node;
+
+  otherNode->parent = node->parent;
+
+  if(node->parent == t->nil)
+    t->root = otherNode;
+  else if(node == node->parent->left)
+    node->parent->left = otherNode;
+  else
+    node->parent->right = otherNode;
+
+  otherNode->right = node;
+  node->parent = otherNode;
+}
+
+
+void insertFixup(rbtree *t, node_t *node)
+{
+  node_t *tmp;
+  while (node->parent->color == RBTREE_RED)
+  {
+    if(node->parent == node->parent->parent->left)
+    {
+      tmp = node->parent->parent->right;
+      if (tmp->color == RBTREE_RED)
+      {
+        node->parent->color = RBTREE_BLACK;
+        tmp->color = RBTREE_BLACK;
+        node->parent->parent->color = RBTREE_RED;
+        node = node->parent->parent;
+      }
+      else if (node == node->parent->right)
+      {
+        node = node->parent;
+        rotateLeft(t, node);
+      }
+
+      node->parent->color = RBTREE_BLACK;
+      node->parent->parent->color = RBTREE_RED;
+      rotateRight(t, node->parent->parent);
+    }
+    else
+    {
+      tmp = node->parent->parent->left;
+
+      if (tmp->color == RBTREE_RED)
+      {
+        node->parent->color = RBTREE_BLACK;
+        tmp->color = RBTREE_BLACK;
+        node->parent->parent->color = RBTREE_RED;
+        node = node->parent->parent;
+      }
+      else if (node == node->parent->left)
+      {
+        node = node->parent;
+        rotateRight(t, node);
+      }
+
+      node->parent->color = RBTREE_BLACK;
+      node->parent->parent->color = RBTREE_RED;
+      rotateLeft(t, node->parent->parent);
+    }
+  }
+  t->root->color = RBTREE_BLACK;
+}
+
 rbtree *new_rbtree(void) {
   rbtree *p = (rbtree *)calloc(1, sizeof(rbtree));
   // TODO: initialize struct if needed
@@ -43,7 +133,32 @@ void delete_rbtree(rbtree *t) {
 
 node_t *rbtree_insert(rbtree *t, const key_t key) {
   // TODO: implement insert
+  node_t *prev = t->nil;
+  node_t *cur = t->root;
+  node_t *newNode = malloc(sizeof(node_t));
+  newNode->key = key;
+  cur = t->root;
+
+  while(cur != t->nil)
+  {
+    prev = cur;
+    if (newNode->key < cur->key)
+      cur = cur->left;
+    else
+      cur = cur->right;
+  }
+  newNode->parent = prev;
+  if(prev == t->nil)
+    t->root = newNode;
+  else if (newNode->key < prev->key)
+    prev->left = newNode;
+  else
+    prev->right = newNode;
   
+  newNode->left = t->nil;
+  newNode->right = t->nil;
+  newNode->color = RBTREE_RED;
+  insertFixup(t, newNode);
   return t->root;
 }
 
@@ -55,6 +170,7 @@ node_t *rbtree_find(const rbtree *t, const key_t key) {
   while(cur != t->nil)
   {
     if(cur->key == key)
+      // 키 값이 같아도 좌우가 다를 수 있다. 이것까지는 고려하기
       return cur;
     else if(cur->key > key)
       cur = cur->left;
