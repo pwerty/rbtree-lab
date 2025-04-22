@@ -3,8 +3,5 @@
 
 
 int main(int argc, char *argv[]) {
-
-    printf("damn new");
-    new_rbtree();
     return 0;
 }
