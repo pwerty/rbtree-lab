@@ -313,14 +313,23 @@ void test_to_array_suite() {
 }
 
 void test_find_erase(rbtree *t, const key_t *arr, const size_t n) {
-  for (int i = 0; i < n; i++) {
+   for (int i = 0; i < n; i++) {
     node_t *p = rbtree_insert(t, arr[i]);
+    printf("print arr[%d] = %d\n", i, arr[i]);
     assert(p != NULL);
   }
 
   for (int i = 0; i < n; i++) {
+    if (i == 1116)
+    {
+      // 현 상태, 1116번째 값 120 755 8467을 제거한뒤
+      // 재배치 과정에서 nil이 발생함. 
+      printf("");
+    }
     node_t *p = rbtree_find(t, arr[i]);
-    // printf("arr[%d] = %d\n", i, arr[i]);
+    printf("arr[%d] = %d\n", i, arr[i]);
+    // finding 1928946514
+    // 1207062109
     assert(p != NULL);
     assert(p->key == arr[i]);
     rbtree_erase(t, p);
@@ -330,8 +339,8 @@ void test_find_erase(rbtree *t, const key_t *arr, const size_t n) {
     node_t *p = rbtree_find(t, arr[i]);
     assert(p == NULL);
   }
-
-  for (int i = 0; i < n; i++) {
+ 
+   for (int i = 0; i < n; i++) {
     node_t *p = rbtree_insert(t, arr[i]);
     assert(p != NULL);
     node_t *q = rbtree_find(t, arr[i]);
@@ -374,12 +383,13 @@ int main(void) {
   test_insert_single(1024); // ok
   test_find_single(512, 1024); // ok
   test_erase_root(128); // ok 
-  // test_find_erase_fixed();
-  // test_minmax_suite();
-  // test_to_array_suite();
+  test_find_erase_fixed(); // ok
+  test_minmax_suite(); // ok
+  test_to_array_suite(); // ok
   test_distinct_values(); // ok
   test_duplicate_values(); // ok
-  test_multi_instance(); // need tree to array
-  // test_find_erase_rand(10000, 17);
+  test_to_array_suite(); // ok
+  test_multi_instance(); // ok
+  test_find_erase_rand(10000, 17);
   printf("Passed all tests!\n");
 }
