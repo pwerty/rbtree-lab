@@ -315,21 +315,11 @@ void test_to_array_suite() {
 void test_find_erase(rbtree *t, const key_t *arr, const size_t n) {
    for (int i = 0; i < n; i++) {
     node_t *p = rbtree_insert(t, arr[i]);
-    printf("print arr[%d] = %d\n", i, arr[i]);
     assert(p != NULL);
   }
 
   for (int i = 0; i < n; i++) {
-    if (i == 1116)
-    {
-      // 현 상태, 1116번째 값 120 755 8467을 제거한뒤
-      // 재배치 과정에서 nil이 발생함. 
-      printf("");
-    }
     node_t *p = rbtree_find(t, arr[i]);
-    printf("arr[%d] = %d\n", i, arr[i]);
-    // finding 1928946514
-    // 1207062109
     assert(p != NULL);
     assert(p->key == arr[i]);
     rbtree_erase(t, p);

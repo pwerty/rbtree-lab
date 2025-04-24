@@ -3,106 +3,96 @@
 #include <stdlib.h>
 void rotateLeft(rbtree *t, node_t *node)
 {
-  node_t *otherNode = node->right;
-  node->right = otherNode->left;
+  node_t *other = node->right;
+  node->right = other->left;
 
-  if(otherNode->left != t->nil)
-    otherNode->left->parent = node;
+  if(other->left != t->nil)
+    other->left->parent = node;
 
-  otherNode->parent = node->parent;
+  other->parent = node->parent;
   if(node->parent == t->nil)
-    t->root = otherNode;
+      t->root = other;
   else if(node == node->parent->left)
-    node->parent->left = otherNode;
+    node->parent->left = other;
   else
-    node->parent->right = otherNode;
+    node->parent->right = other;
 
-  otherNode->left = node;
-  node->parent = otherNode;
-
-  if(t->root)
-    t->root->parent = t->nil;
+  other->left = node;
+  node->parent = other;
 }
 
 void rotateRight(rbtree *t, node_t *node)
 {
-  node_t *otherNode = node->left;
-  node->left = otherNode->right;
-  if(otherNode->right != t->nil)
-    otherNode->right->parent = node;
+  node_t *other = node->left;
+  node->left = other->right;
+  if(other->right != t->nil)
+  other->right->parent = node;
 
-  otherNode->parent = node->parent;
+  other->parent = node->parent;
 
   if(node->parent == t->nil)
-    t->root = otherNode;
-  else if(node == node->parent->left)
-    node->parent->left = otherNode;
+    t->root = other;
+  else if(node == node->parent->right)
+    node->parent->right = other;
   else
-    node->parent->right = otherNode;
+    node->parent->left = other;
 
-  otherNode->right = node;
-  node->parent = otherNode;
+    other->right = node;
+    node->parent = other;
 
-  if(t->root)
-    t->root->parent = t->nil;
 }
 
 
-void insertFixup(rbtree *t, node_t *node)
+void insertFixup(rbtree *t, node_t *z)
 {
-  node_t *tmp;
-
-  if (node == t->root || node->parent == t->nil || node->parent->parent == t->nil)
-    return;
-  while (node->parent->color == RBTREE_RED)
+  node_t *y;
+  while (z->parent->color == RBTREE_RED)
   {
-    if(node->parent == node->parent->parent->left)
+    if(z->parent == z->parent->parent->left)
     {
-      tmp = node->parent->parent->right;
-      if (tmp != t->nil && tmp->color == RBTREE_RED)
+      y = z->parent->parent->right;
+      if (y->color == RBTREE_RED)
       {
-        node->parent->color = RBTREE_BLACK;
-        tmp->color = RBTREE_BLACK;
-        node->parent->parent->color = RBTREE_RED;
-        node = node->parent->parent;
+        z->parent->color = RBTREE_BLACK;
+        y->color = RBTREE_BLACK;
+        z->parent->parent->color = RBTREE_RED;
+        z = z->parent->parent;
       }
       else 
       {
-        if (node == node->parent->right)
+        if (z == z->parent->right)
         {
-          node = node->parent;
-        rotateLeft(t, node);
+          z = z->parent;
+          rotateLeft(t, z);
         }
-        node->parent->color = RBTREE_BLACK;
-        node->parent->parent->color = RBTREE_RED;
-        rotateRight(t, node->parent->parent);
+        z->parent->color = RBTREE_BLACK;
+        z->parent->parent->color = RBTREE_RED;
+        rotateRight(t, z->parent->parent);
       }
 
     }
     else
     {
-      tmp = node->parent->parent->left;
+      y = z->parent->parent->left;
 
-      if (tmp != t->nil && tmp->color == RBTREE_RED)
+      if (y->color == RBTREE_RED)
       {
-        node->parent->color = RBTREE_BLACK;
-        tmp->color = RBTREE_BLACK;
-        node->parent->parent->color = RBTREE_RED;
-        node = node->parent->parent;
+        z->parent->color = RBTREE_BLACK;
+        y->color = RBTREE_BLACK;
+        z->parent->parent->color = RBTREE_RED;
+        z = z->parent->parent;
       }
       else
       {
-        if (node == node->parent->left)
+        if (z == z->parent->left)
         {
-          node = node->parent;
-          rotateRight(t, node);
+          z = z->parent;
+          rotateRight(t, z);
         }
-        node->parent->color = RBTREE_BLACK;
-        node->parent->parent->color = RBTREE_RED;
-        rotateLeft(t, node->parent->parent);
+        z->parent->color = RBTREE_BLACK;
+        z->parent->parent->color = RBTREE_RED;
+        rotateLeft(t, z->parent->parent);
       }
-
-     
     }
   }
   t->root->color = RBTREE_BLACK;
@@ -129,15 +119,9 @@ void delete_perNode(node_t *node, node_t *nil)
 {
   if(node == nil)
     return;
-
-  if(node->left == nil && node->right == nil)
-  {
-    free(node);
-    return;
-  }
-
   delete_perNode(node->left, nil);
   delete_perNode(node->right, nil);
+  free(node);
 }
 
 void delete_rbtree(rbtree *t) {
@@ -148,33 +132,34 @@ void delete_rbtree(rbtree *t) {
 }
 
 node_t *rbtree_insert(rbtree *t, const key_t key) {
-  // TODO: implement insert
-  node_t *prev = t->nil;
-  node_t *cur = t->root;
+  // newNode는 key를 포함한 책에서의 z를 가리킴
+  node_t *y = t->nil;
+  node_t *x = t->root;
   node_t *newNode = malloc(sizeof(node_t));
   newNode->key = key;
-  newNode->left = t->nil;
-  newNode->right = t->nil;
-  newNode->parent = t->nil;
-  newNode->color = RBTREE_RED;
-  cur = t->root;
 
-  while(cur != t->nil)
+  newNode->parent = t->nil;
+
+  while(x != t->nil)
   {
-    prev = cur;
-    if (newNode->key < prev->key)
-      cur = cur->left;
+    y = x;
+    if (newNode->key < y->key)
+      x = x->left;
     else 
-      cur = cur->right;
+      x = x->right;
   }
-  newNode->parent = prev;
-  if(prev == t->nil)
-    t->root = newNode;
-  else if (newNode->key < prev->key)
-    prev->left = newNode;
-  else
-    prev->right = newNode;
+  newNode->parent = y;
   
+  if(y == t->nil)
+    t->root = newNode;
+  else if (newNode->key < y->key)
+    y->left = newNode;
+  else
+    y->right = newNode;
+  
+    newNode->left = t->nil;
+    newNode->right = t->nil;
+    newNode->color = RBTREE_RED;
 
   insertFixup(t, newNode);
   return t->root;
@@ -237,11 +222,8 @@ void rbtree_transplant(rbtree *t, node_t *u, node_t *v)
 
 void rbtree_erase_fixup(rbtree *t, node_t *x)
 {
-  t->nil->left = t->nil;
-  t->nil->right = t->nil;
   
 
-  // 여기가 nil이 타고 들어왔는데 nil
   node_t *w;
 
   while(x != t->root && x->color == RBTREE_BLACK)
@@ -260,8 +242,7 @@ void rbtree_erase_fixup(rbtree *t, node_t *x)
 
       if (w->left->color == RBTREE_BLACK && w->right->color == RBTREE_BLACK)
       {
-        if(w != t->nil)
-          w->color = RBTREE_RED;
+        w->color = RBTREE_RED;
         x = x->parent;
       }
       else 
@@ -290,11 +271,14 @@ void rbtree_erase_fixup(rbtree *t, node_t *x)
         w->color = RBTREE_BLACK;
         x->parent->color = RBTREE_RED;
         rotateRight(t, x->parent);
-        w = x->parent->right;
+        //
+        w = x->parent->left;
+
       }
   
       if (w->right->color == RBTREE_BLACK && w->left->color == RBTREE_BLACK)
       {
+
         w->color = RBTREE_RED;
         x = x->parent;
       }
@@ -352,11 +336,11 @@ int rbtree_erase(rbtree *t, node_t *p) {
     tmp = q->right;
     // 근데 이러면 tmp가 nil이 될텐데..
 
-    if(q->parent == p)
+    if(tmp != t->nil && q->parent == p)
     {
         tmp->parent = q;
     }
-    else
+    else  
     {
       rbtree_transplant(t, q, q->right);
       q->right = p->right;
@@ -370,6 +354,7 @@ int rbtree_erase(rbtree *t, node_t *p) {
 
   if (qBeforeColor == RBTREE_BLACK)
     rbtree_erase_fixup(t, tmp);
+  free(p);
   return 0;
 }
 
@@ -380,16 +365,11 @@ void callout(node_t *node, key_t *arr, const size_t n, size_t *m, node_t *nil)
   if (n > (*m))
     arr[(*m)++] = node->key;
   callout(node->right, arr, n, m, nil);
-
-
 }
 
 
 int rbtree_to_array(const rbtree *t, key_t *arr, const size_t n) {
   size_t count = 0;
   callout(t->root, arr, n, &count, t->nil);
-  // TODO: implement to_array
-  // 중위 순회를 조져서 하나씩 채워야함
-  // left - cur - right 순서로 진행, 뭔소리임???
   return 0;
 }
